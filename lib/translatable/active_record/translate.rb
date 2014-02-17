@@ -18,7 +18,6 @@ module Translatable
           to_translate.each do |attr|
 
             if is_in_scope? attr
-              p "in_scope? attr : #{is_in_scope? attr}"
               index += 1
               if Translatable::Config.list[model].include?(attr.to_s)
                 q = q.joins("LEFT JOIN snippets sn#{index} ON sn#{index}.record_id = #{model}.id AND sn#{index}.scope = '#{model}' AND sn#{index}.group_id = #{model}.group_id AND sn#{index}.lang = '#{lang}' AND sn#{index}.key = '#{attr}'").
@@ -46,7 +45,13 @@ module Translatable
       def is_in_scope?(attr)
 
         if has_select_values?
-          select_values = self.scoped.select_values
+          select_values = self.scoped.select_values.map { |one|
+            if one.is_a?(String)
+              one.split(',').map(&:lstrip).map(&:rstrip)
+            else
+              one
+            end
+          }.flatten
           select_values.select{ |value| value.is_a?(String) && value.split('.').last == '*' }.length > 0 ||
               select_values.include?(attr) ||
               select_values.include?(attr.to_sym) ||
