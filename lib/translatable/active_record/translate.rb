@@ -4,7 +4,7 @@ module Translatable
       def translate(lang, *attr_names)
 
         model = self.table_name
-        if Translatable::Config.list.has_key? model and self.column_names.include? 'group_id'
+        if Translatable::Config.list.has_key?(model) and self.column_names.include?('group_id')
 
           if attr_names.length == 0
             to_translate = Translatable::Config.list[model]
@@ -48,14 +48,17 @@ module Translatable
           select_values = self.scoped.select_values.map { |one|
             if one.is_a?(String)
               one.split(',').map(&:lstrip).map(&:rstrip)
-            else
-              one
+            elsif one.is_a?(Symbol)
+              one.to_s
             end
           }.flatten
-          select_values.select{ |value| value.is_a?(String) && value.split('.').last == '*' }.length > 0 ||
-              select_values.include?(attr) ||
-              select_values.include?(attr.to_sym) ||
-              select_values.select{ |value| value.is_a?(String) && value.split('.').last == attr }.length > 0
+          p "select_values : #{select_values.reject{ |value| !value.is_a?(String) || !value.split('.').last == '*' && !value.split('.').last == attr  }.inspect}"
+          is_present = select_values.reject{ |value| !value.is_a?(String) || !value.split('.').last == '*' && !value.split('.').last == attr  }
+          if is_present.nil?
+            false
+          else
+            is_present.length > 0
+          end
         else
           true
         end
