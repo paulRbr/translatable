@@ -1,7 +1,7 @@
 module Translatable
   module ActiveRecord
     module Translate
-      def translate(*attr_names, lang)
+      def translate(lang, *attr_names)
 
         model = self.table_name
         if Translatable::Config.list.has_key? model and self.column_names.include? 'group_id'
