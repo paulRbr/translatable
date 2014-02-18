@@ -21,7 +21,7 @@ module Translatable
       is_it = false
       begin
         model = str.singularize.camelize.constantize
-        is_it = true unless model.superclass.name == 'ActiveRecord::base'
+        is_it = true if model.superclass.name == 'ActiveRecord::Base' && str != 'customfields'
       rescue NameError
       end
       is_it

@@ -52,7 +52,6 @@ module Translatable
               one.to_s
             end
           }.flatten
-          p "select_values : #{select_values.reject{ |value| !value.is_a?(String) || !value.split('.').last == '*' && !value.split('.').last == attr  }.inspect}"
           is_present = select_values.reject{ |value| !value.is_a?(String) || !value.split('.').last == '*' && !value.split('.').last == attr  }
           if is_present.nil?
             false
