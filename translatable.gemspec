@@ -1,6 +1,8 @@
+require 'translatable/version'
+
 Gem::Specification.new do |s|
   s.name        = 'easy_translatable'
-  s.version     = Translatable::VERSION
+  s.version     = '0.1.0'
   s.date        = '2014-02-17'
   s.summary     = "Handle translations for AR models into a single table"
   s.description = "Handle translations for AR models into a single table. And provide a helper to select translated values."
