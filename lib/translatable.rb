@@ -44,7 +44,10 @@ module Translatable
       end
 
       unless klass.translated_serialized_attributes.nil?
-        @@translatable[klass.name].map!{ |attr| klass.translated_serialized_attributes.reject{|k,v| k != attr} }
+        @@translatable[klass.name].map! do |attr|
+          serialized = klass.translated_serialized_attributes.reject{|k,v| k != attr}
+          serialized.empty? ? attr : serialized
+        end
       end
     end
 

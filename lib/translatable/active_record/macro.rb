@@ -48,7 +48,7 @@ module Translatable
         self.translated_attribute_names = []
         self.translation_options        = options
         self.fallbacks_for_empty_translations = options[:fallbacks_for_empty_translations]
-        self.translated_serialized_attributes = Hash.new if options[:json]
+        self.translated_serialized_attributes = Hash.new
 
         include InstanceMethods
         extend  ClassMethods
