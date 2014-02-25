@@ -65,7 +65,7 @@ module Translatable
         #after_create :save_translations!
         #after_update :save_translations!
 
-        translation_class.instance_eval %{ attr_accessible :lang }
+        #translation_class.instance_eval %{ attr_accessible :lang }
       end
     end
 
