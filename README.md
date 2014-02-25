@@ -18,3 +18,11 @@ When using bundler put this in your Gemfile:
 ```ruby
 gem 'easy_translatable', '~> 0.1.0'
 ```
+
+## Todo
+
+- Tests, tests and tests
+- cleanup
+- doc
+- migration/model for translation table
+- serialized attributes (JSON/YML)
