@@ -11,23 +11,8 @@ module Translatable
         attr_names -= translated_attribute_names if defined?(translated_attribute_names)
 
         if attr_names.present?
-          translation_class.instance_eval %{
-            attr_accessible :#{attr_names.join(', :')}
-                                          }
 
           attr_names.each do |attr_name|
-            # Detect and apply serialization.
-            serializer = self.serialized_attributes[attr_name.to_s]
-            if serializer.present?
-              if defined?(::ActiveRecord::Coders::YAMLColumn) &&
-                  serializer.is_a?(::ActiveRecord::Coders::YAMLColumn)
-
-                serializer = serializer.object_class
-              end
-
-              translation_class.send :serialize, attr_name, serializer
-            end
-
             # Create accessors for the attribute.
             translated_attr_accessor(attr_name)
             translations_accessor(attr_name)

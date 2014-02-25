@@ -47,7 +47,7 @@ module Translatable
       end
 
       def translate?
-        !@translate_me.nil? && @translate_me = true
+        !@translate_me.nil? && @translate_me
       end
 
       def read_attribute(name, options = {})
