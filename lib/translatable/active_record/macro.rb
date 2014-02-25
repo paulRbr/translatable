@@ -19,6 +19,7 @@ module Translatable
 
             # Add attribute to the list.
             self.translated_attribute_names << attr_name
+            self.translated_serialized_attributes[attr_name] = options[:json] if options[:json]
           end
 
           Translatable.add_translatable self
@@ -43,15 +44,11 @@ module Translatable
         options[:foreign_key] ||= 'record_id'
         options[:conditions] ||= ''
 
-        class_attribute :translated_attribute_names, :translation_options, :fallbacks_for_empty_translations
+        class_attribute :translated_attribute_names, :translation_options, :fallbacks_for_empty_translations, :translated_serialized_attributes
         self.translated_attribute_names = []
         self.translation_options        = options
         self.fallbacks_for_empty_translations = options[:fallbacks_for_empty_translations]
-
-        # Alias original relation method so we can safely override it in ClassMethods.
-        #class << self
-        #  alias relation_without_globalize relation
-        #end
+        self.translated_serialized_attributes = Hash.new if options[:json]
 
         include InstanceMethods
         extend  ClassMethods
