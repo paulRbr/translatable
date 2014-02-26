@@ -19,7 +19,9 @@ module Translatable
 
             # Add attribute to the list.
             self.translated_attribute_names << attr_name
-            self.translated_serialized_attributes[attr_name] = options[:json] if options[:json]
+            if self.serialized_attributes.has_key?(attr_name) || options[:only]
+              self.translated_serialized_attributes[attr_name] = options[:only] ? options[:only] : []
+            end
           end
 
           Translatable.add_translatable self

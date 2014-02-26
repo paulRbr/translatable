@@ -6,7 +6,8 @@ module Translatable
       end
 
       def translated?(name)
-        translated_attribute_names.include?(name.to_sym)
+        included = translated_attribute_names.detect { |attr| attr.is_a?(Hash) ? attr.keys.include?(name.to_sym) : attr == name.to_sym }
+        !included.nil?
       end
 
       protected

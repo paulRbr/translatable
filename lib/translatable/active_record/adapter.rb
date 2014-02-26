@@ -21,8 +21,8 @@ module Translatable
         stash.contains?(locale, name)
       end
 
-      def fetch(locale, name)
-        value = stash_contains?(locale, name) ? fetch_stash(locale, name) : fetch_attribute(locale, name)
+      def fetch(locale, name, value = nil)
+        value = stash_contains?(locale, name) ? fetch_stash(locale, name) : fetch_attribute(locale, name, value)
 
         return value
       end
@@ -33,9 +33,14 @@ module Translatable
 
       protected
 
-      def fetch_attribute(locale, name)
-        translation = record.translation_for(locale, name, false)
-        return translation && translation.send(:value)
+      def fetch_attribute(locale, name, value = nil)
+        if value.nil?
+          translation = record.translation_for(locale, name)
+          return translation && translation.send(:value)
+        else
+          translation = record.translation_for_serialized(locale, name, value)
+          return translation
+        end
       end
 
     end
