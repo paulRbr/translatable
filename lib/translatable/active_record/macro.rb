@@ -24,6 +24,8 @@ module Translatable
             end
           end
 
+          on_save_callback(attr_names, options[:after_save]) if options[:after_save]
+
           Translatable.add_translatable self
 
         end
@@ -45,6 +47,7 @@ module Translatable
         options[:table_name] ||= Translatable.translation_class.table_name
         options[:foreign_key] ||= 'record_id'
         options[:conditions] ||= ''
+        options[:after_save] ||= false
 
         class_attribute :translated_attribute_names, :translation_options, :fallbacks_for_empty_translations, :translated_serialized_attributes
         self.translated_attribute_names = []
