@@ -38,6 +38,15 @@ module Translatable
           end
         end
       end
+
+      def on_save_callback(attr_names, callback)
+        after_save callback, :if => Proc.new { |rec|
+          attr_names.any? do |translatable_attr|
+            callback && rec.changes.keys.include?(translatable_attr.to_s)
+          end
+        }
+      end
+
     end
   end
 end
