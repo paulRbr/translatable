@@ -8,7 +8,14 @@ Gem::Specification.new do |s|
   s.email       = 'paul.bonaud@clicrdv.com'
   s.files       = Dir['LICENSE', 'README.md', 'lib/**/*']
   s.add_runtime_dependency 'activesupport', '~> 3.2'
-  s.add_development_dependency 'rake', '~> 0'
+  s.add_development_dependency 'database_cleaner', '~> 0.6.0'
+  s.add_development_dependency 'mocha'
+  s.add_development_dependency 'pathname_local'
+  s.add_development_dependency 'test_declarative'
+  s.add_development_dependency 'friendly_id'
+  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rdoc'
   if RUBY_VERSION >= "1.9"
      s.add_development_dependency 'coveralls', '~> 0'
   end

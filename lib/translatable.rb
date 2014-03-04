@@ -7,7 +7,7 @@ module Translatable
 
   class << self
     def locale
-      I18n.locale
+      read_locale || I18n.locale
     end
 
     def locale=(locale)
@@ -16,9 +16,12 @@ module Translatable
 
     def with_locale(locale, &block)
       previous_locale = read_locale
-      set_locale(locale)
-      result = yield(locale)
-      set_locale(previous_locale)
+      begin
+        set_locale(locale)
+        result = yield(locale)
+      ensure
+        set_locale(previous_locale)
+      end
       result
     end
 

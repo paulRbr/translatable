@@ -8,42 +8,77 @@ module Translatable
       end
 
       def self.included(base)
-        # only Rails > 3.1.x compatibility
-        base.class_eval %{
-          def attributes=(attributes, *args)
-            with_given_locale(attributes) { super }
-          end
-        }
+        # Maintian Rails 3.0.x compatibility ..
+        if base.method_defined?(:assign_attributes)
+          base.class_eval %{
+            def assign_attributes(attributes, options = {})
+              with_given_locale(attributes) { super }
+            end
+          }
+        else
+          base.class_eval %{
+            def attributes=(attributes, *args)
+              with_given_locale(attributes) { super }
+            end
+
+            def update_attributes!(attributes, *args)
+              with_given_locale(attributes) { super }
+            end
+
+            def update_attributes(attributes, *args)
+              with_given_locale(attributes) { super }
+            end
+          }
+        end
       end
 
 
-      #def write_attribute(name, value, options = {})
-      #  if translated?(name)
-      #    options = {:locale => Translatable.locale}.merge(options)
-      #
-      #    # Dirty tracking, paraphrased from
-      #    # ActiveRecord::AttributeMethods::Dirty#write_attribute.
-      #    name_str = name.to_s
-      #    if attribute_changed?(name_str)
-      #      # If there's already a change, delete it if this undoes the change.
-      #      old = changed_attributes[name_str]
-      #      changed_attributes.delete(name_str) if value == old
-      #    else
-      #      # If there's not a change yet, record it.
-      #      old = globalize.fetch(options[:locale], name)
-      #      old = old.clone if old.duplicable?
-      #      changed_attributes[name_str] = old if value != old
-      #    end
-      #
-      #    translatable.write(options[:locale], name, value)
-      #  else
-      #    super(name, value)
-      #  end
-      #end
+      def write_attribute(name, value, options = {})
+        if translated?(name) && translate?
+          options = {:locale => Translatable.locale}.merge(options)
+
+          # Dirty tracking, paraphrased from
+          # ActiveRecord::AttributeMethods::Dirty#write_attribute.
+          name_str = name.to_s
+          if attribute_changed?(name_str)
+            # If there's already a change, delete it if this undoes the change.
+            old = changed_attributes[name_str]
+            changed_attributes.delete(name_str) if value == old
+          else
+            # If there's not a change yet, record it.
+            serialized_value = read_attribute(name, options) if self.serialized_attributes.has_key?(name)
+            old = translatable.fetch(options[:locale], name, serialized_value)
+            old = old.clone if old.duplicable?
+            changed_attributes[name_str] = old if value != old
+          end
+
+          translatable.write(options[:locale], name, value)
+        else
+          super(name, value)
+        end
+      end
 
       def translate
         @translate_me = true
         self
+      end
+
+      def end_translate
+        @translate_me = nil
+        self
+      end
+
+      def reload(options = nil)
+        @translate_me = false
+        translation_caches.clear
+        translated_attribute_names.each { |name| @attributes.delete(name.to_s) }
+        translatable.reset
+        super(options)
+      end
+
+      def save(*)
+        @translate_me = false
+        super
       end
 
       def translate?
@@ -51,7 +86,7 @@ module Translatable
       end
 
       def read_attribute(name, options = {})
-        options = {:translated => true, :locale => nil}.merge(options)
+        options = {:translated => true, :locale => Translatable.locale}.merge(options)
         if translated?(name) and options[:translated]
           serialized_value = super(name) if self.serialized_attributes.has_key?(name)
           if translate? && (value = translatable.fetch(options[:locale] || Translatable.locale, name, serialized_value))
@@ -66,6 +101,22 @@ module Translatable
 
       def translated?(name)
         self.class.translated?(name)
+      end
+
+      def translated_attributes
+        translated_attribute_names.inject({}) do |attributes, name|
+          attributes.merge(name.to_s => translation.send(name))
+        end
+      end
+
+      # This method is basically the method built into Rails
+      # but we have to pass {:translated => false}
+      def untranslated_attributes
+        attrs = {}
+        attribute_names.each do |name|
+          attrs[name] = read_attribute(name, {:translated => false})
+        end
+        attrs
       end
 
       def translation_for(locale, name, build_if_missing = false)
@@ -129,11 +180,29 @@ module Translatable
             attributes.try(:delete, :locale)
 
         if locale
+          already = translate?
+          translate unless translate?
           Translatable.with_locale(locale, &block)
+          end_translate unless already
         else
           yield
         end
       end
+
+      def translations_by_locale(&block)
+        translations.each_with_object(HashWithIndifferentAccess.new) do |t, hash|
+          hash[t.locale] ||= HashWithIndifferentAccess.new
+          hash[t.locale][t.key] = block_given? ? block.call(t) : t
+        end
+      end
+
+      protected
+
+      def save_translations!
+        translatable.save_translations!
+        translation_caches.clear
+      end
+
     end
   end
 end

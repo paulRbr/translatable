@@ -31,6 +31,25 @@ module Translatable
         stash.write(locale, name, value)
       end
 
+      def save_translations!
+        stash.reject {|locale, attrs| attrs.empty?}.each do |locale, attrs|
+          translations = record.translations_by_locale[locale]
+          attrs.each { |name, value|
+            translation = translations && translations[name] ||
+                record.translations.build(:locale => locale.to_s, :scope => record.class.table_name, :key => name)
+            translation['record_id'] = record.id
+            translation['value'] = value
+            translation.save!
+          }
+        end
+
+        reset
+      end
+
+      def reset
+        stash.clear
+      end
+
       protected
 
       def fetch_attribute(locale, name, value = nil)
