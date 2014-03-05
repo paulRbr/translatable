@@ -21,10 +21,11 @@ class DirtyTrackingTest < Test::Unit::TestCase
     assert_equal({ 'title' => ['title', 'changed title'] }, post.changes)
     post.save
 
+    # Automatic fallback on data values
     I18n.locale = :de
-    assert_equal nil, post.title
+    assert_equal 'changed title', post.translate.title
 
-    post.title = 'Titel'
+    post.translate.title = 'Titel'
     assert_equal({ 'title' => [nil, 'Titel'] }, post.changes)
   end
 

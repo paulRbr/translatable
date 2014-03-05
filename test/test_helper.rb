@@ -72,7 +72,7 @@ class Test::Unit::TestCase
   end
 
   def assert_translated(record, locale, attributes, translations)
-    assert_equal Array.wrap(translations), Array.wrap(attributes).map { |name| record.send(name, locale) }
+    assert_equal Array.wrap(translations), Array.wrap(attributes).map { |name| with_locale(locale) { record.translate.send(name) } }
   end
 end
 

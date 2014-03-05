@@ -58,45 +58,6 @@ class DynamicFindersTest < Test::Unit::TestCase
     end
   end
 
-  # https://github.com/svenfuchs/globalize3/issues#issue/5
-  test "simple dynamic finders retruns results from current locale and fallbacks" do
-    en, de, he = 'title', 'titel', 'שם'
-    post = Post.create!(:title => en)
-    post.update_attributes!(:title => de, :locale => :de)
-    post.update_attributes!(:title => he, :locale => :he)
-
-    with_fallbacks do
-      I18n.fallbacks = {:de => [:de, :en], :he => [:he, :en], :en => [:en]}
-
-      with_locale(:en) do
-        assert Post.find_by_title(en)
-        assert_nil Post.find_by_title(de)
-      end
-
-      with_locale(:de) do
-        assert Post.find_by_title(en)
-        assert Post.find_by_title(de)
-        assert_nil Post.find_by_title(he)
-      end
-
-      with_locale(:he) do
-        assert Post.find_by_title(en)
-        assert Post.find_by_title(he)
-        assert_nil Post.find_by_title(de)
-      end
-
-      I18n.fallbacks.clear
-    end
-  end
-
-  test "simple dynamic finders do work on sti models" do
-    Child.create(:content => 'foo')
-    Child.create(:content => 'bar')
-
-    assert_equal 'foo', Child.find_by_content('foo').content
-    assert_equal 'foo', Child.find_all_by_content('foo').first.content
-  end
-
   test "records returned by dynamic finders have writable attributes" do
     Post.create(:title => 'original')
     post = Post.find_by_title('original')
@@ -108,9 +69,10 @@ class DynamicFindersTest < Test::Unit::TestCase
 
   test "records returned by dynamic finders have all translations" do
     post = Post.create(:title => 'a title')
-    Globalize.with_locale(:ja) { post.update_attributes(:title => 'タイトル') }
+    Translatable.with_locale(:ja) { post.translate.update_attributes(:title => 'タイトル') }
     post_by_df = Post.find_by_title('a title')
     assert_equal post.translations, post_by_df.translations
+    assert_equal 1, post.translations.count
   end
 
   test "responds to possible dynamic finders" do
@@ -194,14 +156,6 @@ class TranslatedAndNormalAttributeDynamicFindersTest < Test::Unit::TestCase
     assert two_results.include?(@p1)
     assert two_results.include?(@p2)
     assert_equal [@p2], User.find_all_by_email_and_name(@email, @name2)
-  end
-
-  test "returns empty result set for none existing values" do
-    assert_equal [], User.find_all_by_name_and_email([@name1, @name2], "not existing")
-    assert_equal [], User.find_all_by_name_and_email("not existing", @email)
-
-    assert_equal [], User.find_all_by_email_and_name(["not existing"], @name1)
-    assert_equal [], User.find_all_by_email_and_name(@email, ["not existing"])
   end
 
 end

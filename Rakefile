@@ -1,18 +1,33 @@
+require 'rake'
 require 'rake/testtask'
+require 'rdoc/task'
 
-Rake::TestTask.new do |t|
-		  
+desc 'Default: run unit tests.'
+task :default => :test
+
+desc 'Run all tests.'
+Rake::TestTask.new(:test) do |t|
+
   if RUBY_VERSION >= "1.9.2"
-     require 'simplecov'
-     require 'coveralls'
+    require 'simplecov'
+    require 'coveralls'
 
-     SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-     SimpleCov.start do
-       add_group "Gem", 'lib/'
-     end
+    SimpleCov.formatter = Coveralls::SimpleCov::Formatter
+    SimpleCov.command_name 'Unit Tests'
+    SimpleCov.start do
+      add_group "Gem", 'lib/'
+    end
   end
-  t.libs << 'test'
+  t.libs << 'lib'
+  t.pattern = 'test/**/*_test.rb'
+  t.verbose = true
 end
 
-desc "Run tests"
-task :default => :test
+desc 'Generate documentation.'
+Rake::RDocTask.new(:rdoc) do |rdoc|
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title = 'Globalize'
+  rdoc.options << '--line-numbers' << '--inline-source'
+  rdoc.rdoc_files.include('README')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
