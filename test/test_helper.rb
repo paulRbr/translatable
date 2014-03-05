@@ -4,6 +4,12 @@ require 'test/unit'
 require 'fileutils'
 require 'logger'
 
+if RUBY_VERSION >= "1.9.2"
+  require 'coveralls'
+
+  Coveralls.wear!
+end
+
 Bundler.require(:default, :test)
 require 'database_cleaner'
 require 'test_declarative'

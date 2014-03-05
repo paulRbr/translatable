@@ -7,17 +7,6 @@ task :default => :test
 
 desc 'Run all tests.'
 Rake::TestTask.new(:test) do |t|
-
-  if RUBY_VERSION >= "1.9.2"
-    require 'simplecov'
-    require 'coveralls'
-
-    SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-    SimpleCov.command_name 'Unit Tests'
-    SimpleCov.start do
-      add_group "Gem", 'lib/'
-    end
-  end
   t.libs << 'lib'
   t.pattern = 'test/**/*_test.rb'
   t.verbose = true
