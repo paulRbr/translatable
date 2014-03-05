@@ -23,3 +23,6 @@ gem 'easy_translatable', '~> 0.1.0'
 - cleanup
 - doc
 - migration/model for translation table
+
+
+Copyright (c) 2008, 2009, 2010 Sven Fuchs, Joshua Harvey, Clemens Kofler, John-Paul Bader, ClicRDV
