@@ -1,3 +1,5 @@
 coverage/
 *~
 *.gem
+.bundle
+Gemfile.lock
