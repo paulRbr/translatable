@@ -1,14 +1,8 @@
 module Translatable
   module ActiveRecord
     module Translate
-
-    # Ask for translations
-    def translate
-
-        q = self.scoped
-        q.map(&:translate)
-        q
-
+      def self.translate
+        self.scoped.translate
       end
 
     end
