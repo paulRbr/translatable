@@ -179,7 +179,7 @@ module Translatable
         locale = respond_to?(:locale=) ? attributes.try(:[], :locale) :
             attributes.try(:delete, :locale)
 
-        if locale
+        if locale && !respond_to?(:locale=)
           already = translate?
           translate unless translate?
           Translatable.with_locale(locale, &block)

@@ -26,6 +26,8 @@ module Translatable
 
           on_after_save_callback(attr_names, options[:after_save]) if options[:after_save]
           on_before_save_callback(attr_names, options[:before_save]) if options[:before_save]
+          on_after_update_callback(attr_names, options[:after_update]) if options[:after_update]
+          on_before_update_callback(attr_names, options[:before_update]) if options[:before_update]
 
           Translatable.add_translatable self
 

@@ -39,18 +39,18 @@ module Translatable
         end
       end
 
-      def on_after_save_callback(attr_names, callback)
-        after_save callback, :if => Proc.new { |rec|
+      def condition_callback(attr_names, callback)
+        Proc.new { |rec|
           attr_names.any? do |translatable_attr|
             callback && rec.changes.keys.include?(translatable_attr.to_s)
           end
         }
       end
 
-      def on_before_save_callback(attr_names, callback)
-        before_save callback, :if => Proc.new { |rec|
-          attr_names.any? do |translatable_attr|
-            callback && rec.changes.keys.include?(translatable_attr.to_s)
+      %w(after_save before_save after_update before_update).each do |cb|
+        class_eval  %{
+          def on_#{cb}_callback(attr_names, callback)
+            #{cb} callback, :if => condition_callback(attr_names, callback)
           end
         }
       end

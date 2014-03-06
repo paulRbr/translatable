@@ -188,14 +188,16 @@ class AttributesTest < Test::Unit::TestCase
   test 'does not update original columns with content in a different locale' do
     word = Word.create :locale => 'nl', :term => 'ontvrienden', :definition => 'Iemand als vriend verwijderen op een sociaal netwerk'
     legacy_word = LegacyWord.find(word.id)
-    assert_equal nil, legacy_word.term
+    assert_equal 'ontvrienden', legacy_word.term
 
-    word.update_attributes :term => 'unfriend', :definition => 'To remove someone as a friend on a social network'
+    with_locale(:en) {
+      word.translate.update_attributes :term => 'unfriend', :definition => 'To remove someone as a friend on a social network', :locale => 'en'
+    }
 
-    assert_equal 'unfriend',    word.term
+    assert_equal 'unfriend',    word.translate.term
     Translatable.locale = :nl
     assert_equal 'ontvrienden', word.translate.term
-    assert_equal 'unfriend', legacy_word.reload.term
+    assert_equal 'ontvrienden', legacy_word.reload.term
 
     with_locale(:de) {
       word.translate.update_attributes :term => 'entfreunde', :definition => 'Um jemanden als Freund in einem sozialen Netzwerk zu entfernen', :locale => :de
@@ -204,11 +206,11 @@ class AttributesTest < Test::Unit::TestCase
     with_locale(:de) {
       assert_equal 'entfreunde',  word.translate.term
     }
-    assert_equal 'unfriend',    word.reload.term
+    assert_equal 'ontvrienden',    word.reload.term
     with_locale(:nl) {
       assert_equal 'ontvrienden', word.translate.term
     }
-    assert_equal 'unfriend', legacy_word.reload.term
+    assert_equal 'ontvrienden', legacy_word.reload.term
   end
 
   test 'updates original columns with content in the same locale' do
