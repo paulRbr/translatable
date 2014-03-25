@@ -32,25 +32,12 @@ module Translatable
         end
       end
 
-
+      # Always call the super method, the attribute is translatable and we asked a translated model
       def write_attribute(name, value, options = {})
         if translated?(name) && translate?
           options = {:locale => Translatable.locale}.merge(options)
 
-          # Dirty tracking, paraphrased from
-          # ActiveRecord::AttributeMethods::Dirty#write_attribute.
-          name_str = name.to_s
-          if attribute_changed?(name_str)
-            # If there's already a change, delete it if this undoes the change.
-            old = changed_attributes[name_str]
-            changed_attributes.delete(name_str) if value == old
-          else
-            # If there's not a change yet, record it.
-            serialized_value = read_attribute(name, options) if self.serialized_attributes.has_key?(name)
-            old = translatable.fetch(options[:locale], name, serialized_value)
-            old = old.clone if old.duplicable?
-            changed_attributes[name_str] = old if value != old
-          end
+          # We don't want to track any changes, but save the new value in a translation hash
 
           translatable.write(options[:locale], name, value)
         else
